@@ -11,8 +11,8 @@ db = SQLAlchemy()
 setup_db(app)
     
 """
-def setup_db(app):
-    app.config.from_object('config')
+def setup_db(app, file_name):
+    app.config.from_object(file_name)
     db.app = app
     db.init_app(app)
     migrate = Migrate(app, db)
