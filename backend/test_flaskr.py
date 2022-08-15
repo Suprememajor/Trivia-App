@@ -10,13 +10,16 @@ class TriviaTestCase(unittest.TestCase):
 
     def setUp(self):
         """Define test variables and initialize app."""
-        database_path = "postgresql://suprememajor:12345678@localhost:5432/trivia_2"
+        database_path = "postgresql://suprememajor:12345678@localhost:5432/trivia_3"
         self.app = create_app()
         self.client = self.app.test_client
         self.app.config["SQLALCHEMY_DATABASE_URI"] = database_path
         self.app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-        self.new_question = {"question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?",
-                             "answer": "Maya Angelou", "category": 2, "difficulty": 3}
+        self.new_question = {"question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?", "answer": "Maya Angelou", "category": 2, "difficulty": 3}
+        self.new_category = {"name": "Defiant"}
+        self.new_user1 = {"username": "Ainz_sama", "password": "12345678"}
+        self.new_user2 = {"username": "Ainz", "password": "12345678"}
+        self.new_user3 = {"password": "12345678"}
 
         # binds the app to the current context
         with self.app.app_context():
@@ -29,6 +32,96 @@ class TriviaTestCase(unittest.TestCase):
     def tearDown(self):
         """Executed after reach test"""
         pass
+
+    """
+    Category
+
+    """
+
+    # def test_create_new_category(self):
+    #
+    #     res = self.client().post("/categories", json=self.new_category)
+    #     data = json.loads(res.data)
+    #
+    #     self.assertEqual(res.status_code, 200)
+    #     self.assertEqual(data["success"], True)
+    #     self.assertTrue(data["created"])
+    #     self.assertTrue(len(data["categories"]))
+    #
+    # def test_400_create_category_failed(self):
+    #
+    #     res = self.client().post("/categories")
+    #     data = json.loads(res.data)
+    #
+    #     self.assertEqual(res.status_code, 400)
+    #     self.assertEqual(data["success"], False)
+    #     self.assertEqual(data["message"], "bad request")
+    #
+    # def test_get_categories(self):
+    #     res = self.client().get("/categories")
+    #     data = json.loads(res.data)
+    #
+    #     self.assertEqual(res.status_code, 200)
+    #     self.assertEqual(data["success"], True)
+    #     self.assertTrue(data["total_categories"])
+    #     self.assertTrue(len(data["categories"]))
+    #
+    # def test_delete_category(self):
+    #     category_id = 6
+    #     res = self.client().delete(f"/categories/{category_id}")
+    #     data = json.loads(res.data)
+    #     category = Category.query.filter(Category.id == category_id).one_or_none()
+    #     questions = Question.query.filter(Question.category_id == category_id).all()
+    #
+    #     self.assertEqual(res.status_code, 200)
+    #     self.assertEqual(data["success"], True)
+    #     self.assertEqual(data["deleted"], category_id)
+    #     self.assertTrue(len(data["categories"]))
+    #     self.assertEqual(category, None)
+    #     self.assertEqual(len(questions), 0)
+    #
+    # def test_422_if_category_does_not_exist(self):
+    #
+    #     res = self.client().delete("/categories/1000")
+    #     data = json.loads(res.data)
+    #
+    #     self.assertEqual(res.status_code, 422)
+    #     self.assertEqual(data["success"], False)
+    #     self.assertEqual(data["message"], "unprocessable")
+
+    """
+    User
+
+    """
+    # def test_create_new_user(self):
+    #
+    #     res = self.client().post("/users", json=self.new_user1)
+    #     data = json.loads(res.data)
+    #
+    #     self.assertEqual(res.status_code, 200)
+    #     self.assertEqual(data["success"], True)
+    #     self.assertTrue(data["created"])
+    #     self.assertEqual(data["username"], self.new_user1["username"])
+    #
+    # def test_409_create_user_conflict(self):
+    #
+    #     res = self.client().post("/users", json=self.new_user2)
+    #     data = json.loads(res.data)
+    #
+    #     self.assertEqual(res.status_code, 409)
+    #     self.assertEqual(data["success"], False)
+    #     self.assertEqual(data["message"], "resource exists")
+    #
+    # def test_422_create_user_failed(self):
+    #
+    #     res = self.client().post("/users", json=self.new_user3)
+    #     data = json.loads(res.data)
+    #
+    #     self.assertEqual(res.status_code, 422)
+    #     self.assertEqual(data["success"], False)
+    #     self.assertEqual(data["message"], "unprocessable")
+
+
 
     """
     TODO
@@ -54,14 +147,7 @@ class TriviaTestCase(unittest.TestCase):
     #     self.assertEqual(data["success"], False)
     #     self.assertEqual(data["message"], "resource not found")
 
-    # def test_get_categories(self):
-    #     res = self.client().get("/categories")
-    #     data = json.loads(res.data)
-    #
-    #     self.assertEqual(res.status_code, 200)
-    #     self.assertEqual(data["success"], True)
-    #     self.assertTrue(data["total_categories"])
-    #     self.assertTrue(len(data["categories"]))
+
 
     # # Delete a different book in each attempt
     # def test_delete_question(self):

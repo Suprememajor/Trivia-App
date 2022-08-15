@@ -144,14 +144,12 @@ class User(db.Model):
 
     id = Column(Integer, primary_key=True)
     username = Column(String, unique=True, nullable=False)
-    email = Column(String, unique=True, nullable=False)
     password = Column(String, nullable=False)
     score = Column(Integer, nullable=False)
 
-    def __init__(self, username, email, password):
+    def __init__(self, username, password):
         self.score = 0
         self.username = username
-        self.email = email
         self.password = password
 
     def insert(self):
@@ -169,7 +167,6 @@ class User(db.Model):
         return {
             'id': self.id,
             'username': self.username,
-            'email': self.email,
             'password': self.password,
             'score': self.score
         }

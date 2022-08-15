@@ -1,7 +1,7 @@
 from flask import Flask, request, abort, jsonify
 from flask_cors import CORS
 
-from models import setup_db, Question, Category
+from models import setup_db, Question, Category, User
 
 QUESTIONS_PER_PAGE = 10
 
@@ -39,6 +39,113 @@ def create_app(test_config=None):
     @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
     """
 
+    """
+    Category
+
+    """
+
+    @app.route("/categories", methods=["POST"])
+    def create_category():
+        body = request.get_json()
+
+        try:
+            name = body["name"]
+            category = Category(name=name)
+            category.insert()
+            categories = [category.format() for category in Category.query.all()]
+
+            return jsonify(
+                {
+                    "success": True,
+                    "created": category.id,
+                    "categories": categories
+                }
+            )
+
+        except:
+            abort(422)
+
+    @app.route("/categories")
+    def retrieve_categories():
+        categories = Category.query.order_by(Category.name).all()
+        if len(categories) == 0:
+            abort(404)
+        return jsonify(
+            {
+                "success": True,
+                "categories": [cat.format() for cat in categories],
+                "total_categories": len(Category.query.all())
+            }
+        )
+
+    @app.route("/categories/<int:category_id>", methods=["DELETE"])
+    def remove_category(category_id):
+        try:
+            category = Category.query.filter(Category.id == category_id).one_or_none()
+            if category is None:
+                abort(404)
+
+            category.delete()
+            categories = [category.format() for category in Category.query.all()]
+
+            return jsonify(
+                {
+                    "success": True,
+                    "deleted": category_id,
+                    "categories": categories
+                }
+            )
+
+        except:
+            abort(422)
+
+    """
+    User
+
+    """
+
+    @app.route("/users", methods=["POST"])
+    def create_user():
+        body = request.get_json()
+
+        try:
+            username = body["username"]
+            username_exists = bool(User.query.filter(User.username == username).first())
+            if username_exists:
+                raise ValueError
+            password = body["password"]
+            user = User(username=username, password=password)
+            user.insert()
+
+            return jsonify(
+                {
+                    "success": True,
+                    "created": user.id,
+                    "username": username
+                }
+            )
+        except ValueError:
+            abort(409)
+
+        except Exception:
+            abort(422)
+
+    @app.route("/users/<>")
+    def get_user():
+        categories = Category.query.order_by(Category.name).all()
+        if len(categories) == 0:
+            abort(404)
+        return jsonify(
+            {
+                "success": True,
+                "categories": [cat.format() for cat in categories],
+                "total_categories": len(Category.query.all())
+            }
+        )
+
+
+
+
     @app.route("/questions")
     def retrieve_questions():
         selection = Question.query.order_by(Question.id).all()
@@ -58,18 +165,6 @@ def create_app(test_config=None):
             }
         )
 
-    @app.route("/categories")
-    def retrieve_categories():
-        categories = Category.query.order_by(Category.type).all()
-        if len(categories) == 0:
-            abort(404)
-        return jsonify(
-            {
-                "success": True,
-                "categories": [cat.format() for cat in categories],
-                "total_categories": len(Category.query.all())
-            }
-        )
 
     @app.route("/questions/<int:question_id>", methods=["DELETE"])
     def delete_question(question_id):
@@ -105,7 +200,8 @@ def create_app(test_config=None):
         new_difficulty = body.get("difficulty", None)
 
         try:
-            question = Question(question=new_question, answer=new_answer, category=new_category, difficulty=new_difficulty)
+            question = Question(question=new_question, answer=new_answer, category=new_category,
+                                difficulty=new_difficulty)
             question.insert()
 
             selection = Question.query.order_by(Question.id).all()
@@ -126,6 +222,7 @@ def create_app(test_config=None):
 
         except:
             abort(422)
+
     """
     TEST: When you submit a question on the "Add" tab,
     the form will clear and the question will appear at the end of the last page
@@ -164,16 +261,10 @@ def create_app(test_config=None):
     and shown whether they were correct or not.
     """
 
-    """
-    @TODO:
-    Create error handlers for all expected errors
-    including 404 and 422.
-    """
-
     @app.errorhandler(400)
     def bad_request(error):
         return (
-            jsonify({"success": False, "error": 404, "message": "bad request"}),
+            jsonify({"success": False, "error": 400, "message": "bad request"}),
             400,
         )
 
@@ -191,15 +282,18 @@ def create_app(test_config=None):
             422,
         )
 
-    @app.errorhandler(404)
-    def not_found(error):
-        return (
-            jsonify({"success": False, "error": 404, "message": "resource not found"}),
-            404,
-        )
-
     @app.errorhandler(405)
     def method_not_allowed(error):
-        return jsonify({"success": False, "error": 405, "message": "method not allowed"}), 405
+        return (
+            jsonify({"success": False, "error": 405, "message": "method not allowed"}),
+            405
+        )
+
+    @app.errorhandler(409)
+    def conflict(error):
+        return (
+            jsonify({"success": False, "error": 409, "message": "resource exists"}),
+            409
+        )
 
     return app
