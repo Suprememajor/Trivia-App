@@ -1,10 +1,11 @@
 from flask import Flask, request, abort, jsonify
 from flask_cors import CORS
-
+from flask_login import LoginManager
+from flask_login import login_user
 from models import setup_db, Question, Category, User
 
 QUESTIONS_PER_PAGE = 10
-
+login_manager = LoginManager()
 
 def paginate_questions(request, selection):
     page = request.args.get("page", 1, type=int)
@@ -22,6 +23,7 @@ def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
     setup_db(app)
+    login_manager.init_app(app)
     CORS(app, resources={r"/api/*": {"origins": "*"}})
 
     # CORS Headers
@@ -104,41 +106,42 @@ def create_app(test_config=None):
 
     """
 
-    @app.route("/users", methods=["POST"])
+    @app.route("/users/register", methods=["POST"])
     def create_user():
         body = request.get_json()
+        email = body.get("email")
+        password = body.get("password")
+        if email is None or password is None:
+            abort(400)
+
+        # Checks if email is already in use
+        if User.query.filter(User.email == email).first():
+            abort(409)
 
         try:
-            username = body["username"]
-            username_exists = bool(User.query.filter(User.username == username).first())
-            if username_exists:
-                raise ValueError
-            password = body["password"]
-            user = User(username=username, password=password)
+            user = User(email=email, password=password)
             user.insert()
 
             return jsonify(
                 {
                     "success": True,
                     "created": user.id,
-                    "username": username
+                    "email": email
                 }
             )
-        except ValueError:
-            abort(409)
-
-        except Exception:
+        except:
             abort(422)
 
-    @app.route("/users/<>")
+    @app.route("/users/login", methods=["POST"])
     def get_user():
-        categories = Category.query.order_by(Category.name).all()
-        if len(categories) == 0:
-            abort(404)
+        body = request.get_json()
+        user = User.query.filter_by(email=body["email"]).first()
+        if user is not None and user.verify_password(body["password"]):
+            login_user(user, body["remember_me"])
+        print(user)
         return jsonify(
             {
                 "success": True,
-                "categories": [cat.format() for cat in categories],
                 "total_categories": len(Category.query.all())
             }
         )

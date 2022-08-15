@@ -1,6 +1,8 @@
+from flask_login import UserMixin
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, String, Integer
+from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
 
@@ -139,18 +141,21 @@ User
 """
 
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True)
-    username = Column(String, unique=True, nullable=False)
+    email = Column(String, unique=True, nullable=False)
     password = Column(String, nullable=False)
     score = Column(Integer, nullable=False)
 
-    def __init__(self, username, password):
+    def verify_password(self, password):
+        return check_password_hash(self.password, password)
+
+    def __init__(self, email, password):
         self.score = 0
-        self.username = username
-        self.password = password
+        self.email = email
+        self.password = generate_password_hash(password)
 
     def insert(self):
         db.session.add(self)
@@ -166,7 +171,7 @@ class User(db.Model):
     def format(self):
         return {
             'id': self.id,
-            'username': self.username,
+            'username': self.email,
             'password': self.password,
             'score': self.score
         }
