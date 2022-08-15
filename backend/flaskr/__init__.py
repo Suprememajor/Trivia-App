@@ -1,8 +1,5 @@
-import os
 from flask import Flask, request, abort, jsonify
-from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-import random
 
 from models import setup_db, Question, Category
 
@@ -15,6 +12,7 @@ def paginate_questions(request, selection):
     end = start + QUESTIONS_PER_PAGE
 
     questions = [questions.format() for questions in selection]
+    print(questions)
     current_questions = questions[start:end]
 
     return current_questions
@@ -23,7 +21,7 @@ def paginate_questions(request, selection):
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
-    setup_db(app, 'config')
+    setup_db(app)
     CORS(app, resources={r"/api/*": {"origins": "*"}})
 
     # CORS Headers
@@ -43,13 +41,13 @@ def create_app(test_config=None):
 
     @app.route("/questions")
     def retrieve_questions():
-
         selection = Question.query.order_by(Question.id).all()
         current_questions = paginate_questions(request, selection)
         categories = Category.query.all()
         if len(current_questions) == 0:
             abort(404)
         cats = [cat.type for cat in categories]
+        print(cats)
         return jsonify(
             {
                 "success": True,
@@ -60,39 +58,75 @@ def create_app(test_config=None):
             }
         )
 
-    """
-    @TODO:
-    Create an endpoint to handle GET requests
-    for all available categories.
-    """
+    @app.route("/categories")
+    def retrieve_categories():
+        categories = Category.query.order_by(Category.type).all()
+        if len(categories) == 0:
+            abort(404)
+        return jsonify(
+            {
+                "success": True,
+                "categories": [cat.format() for cat in categories],
+                "total_categories": len(Category.query.all())
+            }
+        )
 
-    """
-    @TODO:
-    Create an endpoint to handle GET requests for questions,
-    including pagination (every 10 questions).
-    This endpoint should return a list of questions,
-    number of total questions, current category, categories.
+    @app.route("/questions/<int:question_id>", methods=["DELETE"])
+    def delete_question(question_id):
+        try:
+            question = Question.query.filter(Question.id == question_id).one_or_none()
+            if question is None:
+                abort(404)
 
-    TEST: At this point, when you start the application
-    you should see questions and categories generated,
-    ten questions per page and pagination at the bottom of the screen for three pages.
-    Clicking on the page numbers should update the questions.
-    """
+            question.delete()
+            selection = Question.query.order_by(Question.id).all()
+            current_questions = paginate_questions(request, selection)
 
-    """
-    @TODO:
-    Create an endpoint to DELETE question using a question ID.
+            return jsonify(
+                {
+                    "success": True,
+                    "deleted": question_id,
+                    "questions": current_questions,
+                    "total_questions": len(Question.query.all())
+                }
+            )
 
-    TEST: When you click the trash icon next to a question, the question will be removed.
-    This removal will persist in the database and when you refresh the page.
-    """
+        except:
+            abort(422)
 
-    """
-    @TODO:
-    Create an endpoint to POST a new question,
-    which will require the question and answer text,
-    category, and difficulty score.
+    @app.route("/questions", methods=["POST"])
+    def create_book():
+        # curl http://127.0.0.1:5000/books -X POST -H "Content-Type: application/json" -d '{"search":"migrant"}'
+        body = request.get_json()
 
+        new_question = body.get("question", None)
+        new_answer = body.get("answer", None)
+        new_category = body.get("category", None)
+        new_difficulty = body.get("difficulty", None)
+
+        try:
+            question = Question(question=new_question, answer=new_answer, category=new_category, difficulty=new_difficulty)
+            question.insert()
+
+            selection = Question.query.order_by(Question.id).all()
+            current_questions = paginate_questions(request, selection)
+            cats = Category.query.all()
+
+            return jsonify(
+                {
+                    "success": True,
+                    "created": question.id,
+                    "books": current_questions,
+                    "total_books": len(Question.query.all()),
+                    "categories": cats,
+                    "questions": current_questions,
+                    "total_questions": len(Question.query.all())
+                }
+            )
+
+        except:
+            abort(422)
+    """
     TEST: When you submit a question on the "Add" tab,
     the form will clear and the question will appear at the end of the last page
     of the questions list in the "List" tab.
