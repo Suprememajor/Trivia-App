@@ -72,13 +72,11 @@ def create_app(test_config=None):
         categories = Category.query.order_by(Category.name).all()
         if len(categories) == 0:
             abort(404)
-        return jsonify(
-            {
-                "success": True,
-                "categories": [cat.format() for cat in categories],
-                "total_categories": len(Category.query.all())
-            }
-        )
+        categories = {cat.id: cat.name for cat in categories}
+        return jsonify({
+            "success": True,
+            "categories": categories
+        })
 
     # """
     # User
@@ -186,12 +184,14 @@ def create_app(test_config=None):
     @app.route("/questions/<int:question_id>", methods=["DELETE"])
     def delete_question(question_id):
         try:
+            cat_all_id = Category.query.filter_by(name="All").first().id
+            cur_cat_id = request.args.get("category", cat_all_id, type=int)
             question = Question.query.filter(Question.id == question_id).one_or_none()
             if question is None:
                 abort(404)
 
             question.delete()
-            selection = Question.query.order_by(Question.id).all()
+            selection = Question.query.filter_by(category_id=cur_cat_id).order_by(Question.id).all()
             current_questions = paginate_questions(request, selection)
 
             return jsonify(
