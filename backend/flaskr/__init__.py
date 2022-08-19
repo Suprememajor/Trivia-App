@@ -4,6 +4,7 @@ from models import setup_db, Question, Category
 
 QUESTIONS_PER_PAGE = 10
 
+
 def paginate_questions(request, selection):
     page = request.args.get("page", 1, type=int)
     start = (page - 1) * QUESTIONS_PER_PAGE
@@ -78,27 +79,6 @@ def create_app(test_config=None):
                 "total_categories": len(Category.query.all())
             }
         )
-
-    @app.route("/categories/<int:category_id>", methods=["DELETE"])
-    def remove_category(category_id):
-        try:
-            category = Category.query.filter(Category.id == category_id).one_or_none()
-            if category is None:
-                abort(404)
-
-            category.delete()
-            categories = [category.format() for category in Category.query.all()]
-
-            return jsonify(
-                {
-                    "success": True,
-                    "deleted": category_id,
-                    "categories": categories
-                }
-            )
-
-        except:
-            abort(422)
 
     # """
     # User
@@ -181,27 +161,27 @@ def create_app(test_config=None):
         except Exception as e:
             abort(422)
 
-
-
     @app.route("/questions")
     def retrieve_questions():
-        selection = Question.query.order_by(Question.id).all()
+        cat_all_id = Category.query.filter_by(name="All").first().id
+        cur_cat_id = request.args.get("category", cat_all_id, type=int)
+        selection = Question.query.filter_by(category_id=cur_cat_id).order_by(Question.id).all()
         current_questions = paginate_questions(request, selection)
         categories = Category.query.all()
         if len(current_questions) == 0:
             abort(404)
-        cats = [cat.type for cat in categories]
-        print(cats)
+        cats = [cat.format() for cat in categories]
+        current_category = Category.query.get(cur_cat_id).format()
+
         return jsonify(
             {
                 "success": True,
-                "current_category": "All",
+                "current_category": current_category,
                 "categories": cats,
                 "questions": current_questions,
                 "total_questions": len(Question.query.all())
             }
         )
-
 
     @app.route("/questions/<int:question_id>", methods=["DELETE"])
     def delete_question(question_id):
@@ -225,7 +205,6 @@ def create_app(test_config=None):
 
         except:
             abort(422)
-
 
     """
     TEST: When you submit a question on the "Add" tab,

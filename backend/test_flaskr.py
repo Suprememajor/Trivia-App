@@ -104,7 +104,7 @@ class QuestionModelTestCase(unittest.TestCase):
         self.app.config["SQLALCHEMY_DATABASE_URI"] = database_path
         self.app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
         self.new_question = {"question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?",
-                             "answer": "Maya Angelou", "category": 6, "difficulty": 3}
+                             "answer": "Maya Angelou", "category": 4, "difficulty": 3}
         self.new_question2 = {"question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?",
                              "answer": "Maya Angelou", "difficulty": 3}
 
@@ -121,7 +121,7 @@ class QuestionModelTestCase(unittest.TestCase):
         pass
 
     # def test_create_new_question(self):
-    #     res = self.client().post("/questions", json=self.new_question)
+    #     res = self.client().post(f"/questions?category={self.new_question['category']}", json=self.new_question)
     #     data = json.loads(res.data)
     #
     #     self.assertEqual(res.status_code, 200)
@@ -141,42 +141,35 @@ class QuestionModelTestCase(unittest.TestCase):
     #     self.assertEqual(data["success"], False)
     #     self.assertEqual(data["message"], "bad request")
 
-    def test_get_categories(self):
-        res = self.client().get("/categories")
+    def test_get_paginated_questions(self):
+        res = self.client().get(f"/questions")
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data["success"], True)
-        self.assertTrue(data["total_categories"])
+        self.assertTrue(data["total_questions"])
         self.assertTrue(len(data["categories"]))
+        self.assertTrue(len(data["questions"]))
 
-    def test_get_category(self):
-        res = self.client().get("/categories", json={})
+    def test_get_paginated_questions_with_cat(self):
+        category = 4
+        res = self.client().get(f"/questions?category={category}")
         data = json.loads(res.data)
 
-        self.assertEqual(res.status_code, 400)
-        self.assertEqual(data["success"], False)
-        self.assertEqual(data["message"], "bad request")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data["success"], True)
+        self.assertEqual(data["current_category"]["id"], category)
+        self.assertTrue(data["total_questions"])
+        self.assertTrue(len(data["categories"]))
+        self.assertTrue(len(data["questions"]))
 
-    #
-    # def test_get_paginated_questions(self):
-    #     res = self.client().get("/questions")
-    #     data = json.loads(res.data)
-    #
-    #     self.assertEqual(res.status_code, 200)
-    #     self.assertEqual(data["success"], True)
-    #     self.assertEqual(data["current_category"], "All")
-    #     self.assertTrue(data["total_questions"])
-    #     self.assertTrue(len(data["questions"]))
-    #     self.assertTrue(len(data["categories"]))
-    #
-    # def test_404_sent_requesting_beyond_valid_page(self):
-    #     res = self.client().get("/questions?page=1000")
-    #     data = json.loads(res.data)
-    #
-    #     self.assertEqual(res.status_code, 404)
-    #     self.assertEqual(data["success"], False)
-    #     self.assertEqual(data["message"], "resource not found")
+    def test_404_sent_requesting_beyond_valid_page(self):
+        res = self.client().get("/questions?page=1000")
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data["success"], False)
+        self.assertEqual(data["message"], "resource not found")
 
 
 # Make the tests conveniently executable
