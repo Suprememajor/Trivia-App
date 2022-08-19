@@ -105,13 +105,17 @@ class QuestionModelTestCase(unittest.TestCase):
         self.app.config["SQLALCHEMY_DATABASE_URI"] = database_path
         self.app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
         self.new_question = {"question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?",
-                             "answer": "Maya Angelou", "category": 4, "difficulty": 3}
+                             "answer": "Maya Angelou", "category": 5, "difficulty": 3}
         self.new_question2 = {"question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?",
                               "answer": "Maya Angelou", "difficulty": 3}
         self.new_question3 = {"question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?",
                               "answer": "Maya Angelou", "difficulty": 3, "searchTerm": "ose"}
         self.new_question4 = {"question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?",
                               "answer": "Maya Angelou", "difficulty": 3, "searchTerm": "Nirtumizac"}
+        self.quiz1 = {"previous_questions": [12, 13, 14], "quiz_category": 4}
+        self.quiz2 = {"quiz_category": 4}
+        self.quiz3 = {"previous_questions": [12, 13, 14]}
+        self.quiz4 = {"quiz_category": 9}
 
         # binds the app to the current context
         with self.app.app_context():
@@ -165,7 +169,53 @@ class QuestionModelTestCase(unittest.TestCase):
     #     self.assertEqual(res.status_code, 404)
     #     self.assertEqual(data["success"], False)
     #     self.assertEqual(data["message"], "resource not found")
+    ####################################################################################################################
+    # Tests for get_quiz
+    ####################################################################################################################
+    # def test_get_quiz_all_data(self):
+    #     res = self.client().post("/quizzes", json=self.quiz1)
+    #     data = json.loads(res.data)
+    #
+    #     self.assertEqual(res.status_code, 200)
+    #     self.assertEqual(data["success"], True)
+    #     self.assertEqual(data["question"]["category_id"], self.quiz1["quiz_category"])
+    #     self.assertEqual(data["question"]["id"], 15)
+    #     self.assertTrue(data["question"])
+    #
+    # def test_get_quiz_category(self):
+    #     res = self.client().post("/quizzes", json=self.quiz2)
+    #     data = json.loads(res.data)
+    #
+    #     self.assertEqual(res.status_code, 200)
+    #     self.assertEqual(data["success"], True)
+    #     self.assertEqual(data["question"]["category_id"], self.quiz2["quiz_category"])
+    #     self.assertTrue(data["question"])
+    #
+    # def test_get_quiz_except_list(self):
+    #     res = self.client().post("/quizzes", json=self.quiz3)
+    #     data = json.loads(res.data)
+    #
+    #     self.assertEqual(res.status_code, 200)
+    #     self.assertEqual(data["success"], True)
+    #     self.assertTrue(data["question"])
+    #
+    # def test_get_quiz_no_data(self):
+    #     res = self.client().post("/quizzes", json={})
+    #     data = json.loads(res.data)
+    #
+    #     self.assertEqual(res.status_code, 200)
+    #     self.assertEqual(data["success"], True)
+    #     self.assertTrue(data["question"])
 
+    # def test_422_get_quiz_failed(self):
+    #     res = self.client().post("/quizzes", json=self.quiz4)
+    #     data = json.loads(res.data)
+    #
+    #     self.assertEqual(res.status_code, 404)
+    #     self.assertEqual(data["success"], False)
+    #     self.assertEqual(data["message"], "resource not found")
+
+    print("Hello")
     # def test_get_paginated_questions(self):
     #     page = 1
     #     res = self.client().get(f"/questions?page={page}")

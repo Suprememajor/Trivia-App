@@ -180,21 +180,31 @@ def create_app(test_config=None):
     #     else:
     #         abort(400)
 
-    @app.route("/quizzes", methods=["POST"])
-    def get_quiz():
-        body = request.get_json()
-        previous_questions = body.get("previous_questions", None)
-        quiz_category = body.get("quiz_category", None)
-        if previous_questions and quiz_category:
-            question = Question.query.filter(Question.id.not_in(previous_questions)).first()
-            if question is None:
-                abort(404)
-            return jsonify({
-                "success": True,
-                "question": question.format()
-            })
-        else:
-            abort(400)
+    # @app.route("/quizzes", methods=["POST"])
+    # def get_quiz():
+    #     body = request.get_json()
+    #     previous_questions = body.get("previous_questions", None)
+    #     quiz_category = body.get("quiz_category", None)
+    #     question = None
+    #     try:
+    #         if previous_questions and quiz_category:
+    #             question = Question.query.filter(Question.category_id == quiz_category) \
+    #                 .filter(Question.id.not_in(previous_questions)).first()
+    #         elif quiz_category:
+    #             question = Question.query.filter(Question.category_id == quiz_category).first()
+    #         elif previous_questions:
+    #             question = Question.query.filter(Question.id.not_in(previous_questions)).first()
+    #         else:
+    #             question = Question.query.first()
+    #     except Exception as e:
+    #         abort(422)
+    #
+    #     if question is None:
+    #         abort(404)
+    #     return jsonify({
+    #         "success": True,
+    #         "question": question.format()
+    #     })
 
     @app.route("/questions")
     def retrieve_questions():
