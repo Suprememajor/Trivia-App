@@ -4,7 +4,7 @@ import unittest
 from flask_sqlalchemy import SQLAlchemy
 
 from flaskr import create_app
-from models import Category
+from models import Question
 
 
 # class CategoryModelTestCase(unittest.TestCase):
@@ -217,60 +217,58 @@ class QuestionModelTestCase(unittest.TestCase):
     #     self.assertEqual(data["success"], False)
     #     self.assertEqual(data["message"], "resource not found")
 
-    def test_get_paginated_questions(self):
-        page = 1
-        res = self.client().get(f"/questions?page={page}")
-        data = json.loads(res.data)
-
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data["success"], True)
-        self.assertEqual(data["currentCategory"], "All")
-        self.assertTrue(data["totalQuestions"])
-        self.assertTrue(len(data["categories"]))
-        self.assertTrue(len(data["questions"]))
-
-    def test_get_paginated_questions_with_cat(self):
-        category_id = 4
-        category = Category.query.get(category_id)
-        res = self.client().get(f"/questions?category={category_id}")
-        data = json.loads(res.data)
-
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data["success"], True)
-        self.assertEqual(data["currentCategory"], category.name)
-        self.assertTrue(data["totalQuestions"])
-        self.assertTrue(len(data["categories"]))
-        self.assertTrue(len(data["questions"]))
-
-    def test_404_sent_requesting_beyond_valid_page(self):
-        res = self.client().get("/questions?page=1000")
-        data = json.loads(res.data)
-
-        self.assertEqual(res.status_code, 404)
-        self.assertEqual(data["success"], False)
-        self.assertEqual(data["message"], "resource not found")
-
-    # Delete a different question in each attempt
-    # def test_delete_question(self):
-    #     id = 9
-    #     res = self.client().delete(f"/questions/{id}")
+    # def test_get_paginated_questions(self):
+    #     page = 1
+    #     res = self.client().get(f"/questions?page={page}")
     #     data = json.loads(res.data)
-    #     question = Question.query.filter(Question.id == id).one_or_none()
     #
     #     self.assertEqual(res.status_code, 200)
     #     self.assertEqual(data["success"], True)
-    #     self.assertEqual(data["deleted"], id)
-    #     self.assertTrue(data["total_questions"])
+    #     self.assertEqual(data["currentCategory"], "All")
+    #     self.assertTrue(data["totalQuestions"])
+    #     self.assertTrue(len(data["categories"]))
     #     self.assertTrue(len(data["questions"]))
-    #     self.assertEqual(question, None)
     #
-    # def test_422_if_question_does_not_exist(self):
-    #     res = self.client().delete("/questions/1000")
+    # def test_get_paginated_questions_with_cat(self):
+    #     category_id = 4
+    #     category = Category.query.get(category_id)
+    #     res = self.client().get(f"/questions?category={category_id}")
     #     data = json.loads(res.data)
     #
-    #     self.assertEqual(res.status_code, 422)
+    #     self.assertEqual(res.status_code, 200)
+    #     self.assertEqual(data["success"], True)
+    #     self.assertEqual(data["currentCategory"], category.name)
+    #     self.assertTrue(data["totalQuestions"])
+    #     self.assertTrue(len(data["categories"]))
+    #     self.assertTrue(len(data["questions"]))
+    #
+    # def test_404_sent_requesting_beyond_valid_page(self):
+    #     res = self.client().get("/questions?page=1000")
+    #     data = json.loads(res.data)
+    #
+    #     self.assertEqual(res.status_code, 404)
     #     self.assertEqual(data["success"], False)
-    #     self.assertEqual(data["message"], "unprocessable")
+    #     self.assertEqual(data["message"], "resource not found")
+
+    # Delete a different question in each attempt
+    def test_delete_question(self):
+        id = 6
+        res = self.client().delete(f"/questions/{id}")
+        data = json.loads(res.data)
+        question = Question.query.filter(Question.id == id).one_or_none()
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data["success"], True)
+        self.assertEqual(data["deleted"], id)
+        self.assertEqual(question, None)
+
+    def test_422_if_question_does_not_exist(self):
+        res = self.client().delete("/questions/1000")
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 422)
+        self.assertEqual(data["success"], False)
+        self.assertEqual(data["message"], "unprocessable")
 
 
 # Make the tests conveniently executable

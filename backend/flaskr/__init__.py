@@ -1,6 +1,6 @@
-from flask import Flask, request, abort, jsonify
+from flask import Flask, abort, jsonify
 from flask_cors import CORS
-from models import setup_db, Question, Category
+from models import setup_db, Question
 
 QUESTIONS_PER_PAGE = 10
 
@@ -207,29 +207,29 @@ def create_app(test_config=None):
     #         "question": question.format()
     #     })
 
-    @app.route("/questions")
-    def retrieve_questions():
-        cur_cat_id = request.args.get("category", None, type=int)
-        if cur_cat_id:
-            current_category = Category.query.filter(Category.id == cur_cat_id).one_or_none()
-            if current_category is None:
-                abort(404)
-        else:
-            current_category = Category(name="All")
-        selection = Question.query.order_by(Question.id).all()
-        current_questions = paginate_questions(request, selection)
-        if len(current_questions) == 0:
-            abort(404)
-
-        return jsonify(
-            {
-                "success": True,
-                "currentCategory": current_category.name,
-                "categories": {cat.id: cat.name for cat in Category.query.all()},
-                "questions": current_questions,
-                "totalQuestions": len(selection)
-            }
-        )
+    # @app.route("/questions")
+    # def retrieve_questions():
+    #     cur_cat_id = request.args.get("category", None, type=int)
+    #     if cur_cat_id:
+    #         current_category = Category.query.filter(Category.id == cur_cat_id).one_or_none()
+    #         if current_category is None:
+    #             abort(404)
+    #     else:
+    #         current_category = Category(name="All")
+    #     selection = Question.query.order_by(Question.id).all()
+    #     current_questions = paginate_questions(request, selection)
+    #     if len(current_questions) == 0:
+    #         abort(404)
+    #
+    #     return jsonify(
+    #         {
+    #             "success": True,
+    #             "currentCategory": current_category.name,
+    #             "categories": {cat.id: cat.name for cat in Category.query.all()},
+    #             "questions": current_questions,
+    #             "totalQuestions": len(selection)
+    #         }
+    #     )
 
     @app.route("/questions/<int:question_id>", methods=["DELETE"])
     def delete_question(question_id):
