@@ -137,44 +137,48 @@ def create_app(test_config=None):
     #         }
     #     )
     #
-    @app.route("/questions", methods=["POST"])
-    def create_question():
-        # curl http://127.0.0.1:5000/books -X POST -H "Content-Type: application/json" -d '{"search":"migrant"}'
-        body = request.get_json()
-        new_question = body.get("question", None)
-        new_answer = body.get("answer", None)
-        new_category = body.get("category", None)
-        new_difficulty = body.get("difficulty", None)
-        search_term = body.get("searchTerm", None)
-        cur_cat_id = request.args.get("category", None, type=int)
-        if cur_cat_id:
-            current_category = Category.query.get(cur_cat_id).one_or_none()
-            if current_category is None:
-                abort(404)
-        else:
-            current_category = Category(name="All")
 
-        if search_term:
-            selection = Question.query.filter(Question.question.ilike(f"%{search_term}%").all())
-            if len(selection) == 0:
-                abort(404)
-            current_questions = paginate_questions(request, selection)
-            return jsonify({
-                "success": True,
-                "questions": [question.format() for question in current_questions],
-                "totalQuestions": len(selection),
-                "currentCategory": current_category.name
-            })
-        elif new_question and new_answer and new_category and new_difficulty:
-            try:
-                question = Question(question=new_question, answer=new_answer, category_id=new_category,
-                                    difficulty=new_difficulty)
-                question.insert()
-                return jsonify({"success": True})
-            except:
-                abort(422)
-        else:
-            abort(400)
+    """
+    Question
+
+    """
+    # @app.route("/questions", methods=["POST"])
+    # def create_question():
+    #     body = request.get_json()
+    #     new_question = body.get("question", None)
+    #     new_answer = body.get("answer", None)
+    #     new_category = body.get("category", None)
+    #     new_difficulty = body.get("difficulty", None)
+    #     search_term = body.get("searchTerm", None)
+    #     cur_cat_id = request.args.get("category", None, type=int)
+    #     if cur_cat_id:
+    #         current_category = Category.query.get(cur_cat_id).one_or_none()
+    #         if current_category is None:
+    #             abort(404)
+    #     else:
+    #         current_category = Category(name="All")
+    #
+    #     if search_term:
+    #         selection = Question.query.filter(Question.question.ilike(f"%{search_term}%")).all()
+    #         if len(selection) == 0:
+    #             abort(404)
+    #         current_questions = paginate_questions(request, selection)
+    #         return jsonify({
+    #             "success": True,
+    #             "questions": current_questions,
+    #             "totalQuestions": len(selection),
+    #             "currentCategory": current_category.name
+    #         })
+    #     elif new_question and new_answer and new_category and new_difficulty:
+    #         try:
+    #             question = Question(question=new_question, answer=new_answer, category_id=new_category,
+    #                                 difficulty=new_difficulty)
+    #             question.insert()
+    #             return jsonify({"success": True})
+    #         except:
+    #             abort(422)
+    #     else:
+    #         abort(400)
 
     @app.route("/quizzes", methods=["POST"])
     def get_quiz():
