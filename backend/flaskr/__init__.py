@@ -1,11 +1,8 @@
 from flask import Flask, request, abort, jsonify
 from flask_cors import CORS
-from flask_login import LoginManager
-from flask_login import login_user
-from models import setup_db, Question, Category, User
+from models import setup_db, Question, Category
 
 QUESTIONS_PER_PAGE = 10
-login_manager = LoginManager()
 
 def paginate_questions(request, selection):
     page = request.args.get("page", 1, type=int)
@@ -13,7 +10,6 @@ def paginate_questions(request, selection):
     end = start + QUESTIONS_PER_PAGE
 
     questions = [questions.format() for questions in selection]
-    print(questions)
     current_questions = questions[start:end]
 
     return current_questions
@@ -23,7 +19,6 @@ def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
     setup_db(app)
-    login_manager.init_app(app)
     CORS(app, resources={r"/api/*": {"origins": "*"}})
 
     # CORS Headers
@@ -49,10 +44,14 @@ def create_app(test_config=None):
     @app.route("/categories", methods=["POST"])
     def create_category():
         body = request.get_json()
-
+        name = body.get("name", None)
+        if not name:
+            abort(400)
+        name = name.title()
+        if Category.query.filter_by(name=name).first():
+            abort(409)
+        category = Category(name=name)
         try:
-            name = body["name"]
-            category = Category(name=name)
             category.insert()
             categories = [category.format() for category in Category.query.all()]
 
@@ -64,7 +63,7 @@ def create_app(test_config=None):
                 }
             )
 
-        except:
+        except Exception as e:
             abort(422)
 
     @app.route("/categories")
@@ -101,51 +100,86 @@ def create_app(test_config=None):
         except:
             abort(422)
 
-    """
-    User
-
-    """
-
-    @app.route("/users/register", methods=["POST"])
-    def create_user():
+    # """
+    # User
+    #
+    # """
+    #
+    # @app.route("/users/register", methods=["POST"])
+    # def create_user():
+    #     body = request.get_json()
+    #     email = body.get("email")
+    #     password = body.get("password")
+    #     if email is None or password is None:
+    #         abort(400)
+    #
+    #     # Checks if email is already in use
+    #     if User.query.filter(User.email == email).first():
+    #         abort(409)
+    #
+    #     try:
+    #         user = User(email=email, password=password)
+    #         user.insert()
+    #
+    #         return jsonify(
+    #             {
+    #                 "success": True,
+    #                 "created": user.id,
+    #                 "email": email
+    #             }
+    #         )
+    #     except:
+    #         abort(422)
+    #
+    # @app.route("/users/login", methods=["POST"])
+    # def get_user():
+    #     body = request.get_json()
+    #     user = User.query.filter_by(email=body["email"]).first()
+    #     if user is not None and user.verify_password(body["password"]):
+    #         login_user(user, body["remember_me"])
+    #     print(user)
+    #     return jsonify(
+    #         {
+    #             "success": True,
+    #             "total_categories": len(Category.query.all())
+    #         }
+    #     )
+    #
+    @app.route("/questions", methods=["POST"])
+    def create_question():
+        # curl http://127.0.0.1:5000/books -X POST -H "Content-Type: application/json" -d '{"search":"migrant"}'
         body = request.get_json()
-        email = body.get("email")
-        password = body.get("password")
-        if email is None or password is None:
+        new_question = body.get("question", None)
+        new_answer = body.get("answer", None)
+        new_category = body.get("category", None)
+        new_difficulty = body.get("difficulty", None)
+
+        if not (new_question and new_answer and new_category and new_difficulty):
             abort(400)
 
-        # Checks if email is already in use
-        if User.query.filter(User.email == email).first():
-            abort(409)
-
         try:
-            user = User(email=email, password=password)
-            user.insert()
-
+            cat_all_id = Category.query.filter_by(name="All").first().id
+            cur_cat_id = request.args.get("category", cat_all_id, type=int)
+            question = Question(question=new_question, answer=new_answer, category_id=new_category,
+                                difficulty=new_difficulty)
+            question.insert()
+            selection = Question.query.filter_by(category_id=cur_cat_id).order_by(Question.id).all()
+            current_questions = paginate_questions(request, selection)
+            cats = Category.query.all()
+            current_category = Category.query.get(cur_cat_id).format()
             return jsonify(
                 {
                     "success": True,
-                    "created": user.id,
-                    "email": email
+                    "current_category": current_category,
+                    "created": question.id,
+                    "categories": [cat.format() for cat in cats],
+                    "questions": current_questions,
+                    "total_questions": len(Question.query.all())
                 }
             )
-        except:
+
+        except Exception as e:
             abort(422)
-
-    @app.route("/users/login", methods=["POST"])
-    def get_user():
-        body = request.get_json()
-        user = User.query.filter_by(email=body["email"]).first()
-        if user is not None and user.verify_password(body["password"]):
-            login_user(user, body["remember_me"])
-        print(user)
-        return jsonify(
-            {
-                "success": True,
-                "total_categories": len(Category.query.all())
-            }
-        )
-
 
 
 
@@ -192,39 +226,6 @@ def create_app(test_config=None):
         except:
             abort(422)
 
-    @app.route("/questions", methods=["POST"])
-    def create_book():
-        # curl http://127.0.0.1:5000/books -X POST -H "Content-Type: application/json" -d '{"search":"migrant"}'
-        body = request.get_json()
-
-        new_question = body.get("question", None)
-        new_answer = body.get("answer", None)
-        new_category = body.get("category", None)
-        new_difficulty = body.get("difficulty", None)
-
-        try:
-            question = Question(question=new_question, answer=new_answer, category=new_category,
-                                difficulty=new_difficulty)
-            question.insert()
-
-            selection = Question.query.order_by(Question.id).all()
-            current_questions = paginate_questions(request, selection)
-            cats = Category.query.all()
-
-            return jsonify(
-                {
-                    "success": True,
-                    "created": question.id,
-                    "books": current_questions,
-                    "total_books": len(Question.query.all()),
-                    "categories": cats,
-                    "questions": current_questions,
-                    "total_questions": len(Question.query.all())
-                }
-            )
-
-        except:
-            abort(422)
 
     """
     TEST: When you submit a question on the "Add" tab,

@@ -27,7 +27,7 @@ class Category(db.Model):
     __tablename__ = 'categories'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
+    name = Column(String, nullable=False, unique=True)
     questions = db.relationship('Question', backref='category', lazy=True)
 
     def __init__(self, name):
