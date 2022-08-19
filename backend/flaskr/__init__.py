@@ -142,6 +142,7 @@ def create_app(test_config=None):
     Question
 
     """
+
     # @app.route("/questions", methods=["POST"])
     # def create_question():
     #     body = request.get_json()
@@ -210,7 +211,7 @@ def create_app(test_config=None):
     def retrieve_questions():
         cur_cat_id = request.args.get("category", None, type=int)
         if cur_cat_id:
-            current_category = Category.query.get(cur_cat_id).one_or_none()
+            current_category = Category.query.filter(Category.id == cur_cat_id).one_or_none()
             if current_category is None:
                 abort(404)
         else:
