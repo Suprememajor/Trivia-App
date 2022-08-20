@@ -3,10 +3,14 @@ import unittest
 
 from flask_sqlalchemy import SQLAlchemy
 
-from config import DIALECT, USER, PASSWORD, HOST, PORT
 from flaskr import create_app
 from models import Question, Category
 
+DIALECT = "postgresql"
+USER = "suprememajor"
+PASSWORD = "12345678"
+HOST = "localhost"
+PORT = "5432"
 DATABASE_NAME = "trivia_test"
 DATABASE_PATH = f'{DIALECT}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE_NAME}'
 

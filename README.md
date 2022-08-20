@@ -12,7 +12,7 @@ Developers using this project should already have Python3, pip and node installe
 
 #### Backend
 
-From the backend folder run `pip install requirements.txt`. All required packages are included in the requirements file. 
+From the backend folder run `pip install -r requirements.txt`. All required packages are included in the requirements file. 
 
 To run the application run the following commands: 
 ```
