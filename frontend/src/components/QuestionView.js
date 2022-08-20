@@ -128,8 +128,6 @@ class QuestionView extends Component {
 
 
   render() {
-    console.log(this.state.questions)
-
     return (
       <div className='question-view'>
         <div className='categories-list'>
@@ -161,7 +159,7 @@ class QuestionView extends Component {
               key={q.id}
               question={q.question}
               answer={q.answer}
-              category={this.state.categories[q.category]}
+              category={this.state.categories[q.category_id]}
               difficulty={q.difficulty}
               questionAction={this.questionAction(q.id)}
             />
