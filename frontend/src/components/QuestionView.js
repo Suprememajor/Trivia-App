@@ -25,11 +25,11 @@ class QuestionView extends Component {
       url: `/questions?page=${this.state.page}`, //TODO: update request URL
       type: 'GET',
       success: (result) => {
-        this.setState({
+          this.setState({
           questions: result.questions,
-          totalQuestions: result.total_questions,
+          totalQuestions: result.totalQuestions,
           categories: result.categories,
-          currentCategory: result.current_category,
+          currentCategory: result.currentCategory,
         });
         return;
       },
@@ -126,7 +126,10 @@ class QuestionView extends Component {
     }
   };
 
+
   render() {
+    console.log(this.state.questions)
+
     return (
       <div className='question-view'>
         <div className='categories-list'>
@@ -138,7 +141,7 @@ class QuestionView extends Component {
             Categories
           </h2>
           <ul>
-            {Object.keys(this.state.categories).map((id) => (
+          {Object.keys(this.state.categories).map((id) => (
               <li
                 key={id}
                 onClick={() => {
@@ -146,11 +149,6 @@ class QuestionView extends Component {
                 }}
               >
                 {this.state.categories[id]}
-                <img
-                  className='category'
-                  alt={`${this.state.categories[id].toLowerCase()}`}
-                  src={`${this.state.categories[id].toLowerCase()}.svg`}
-                />
               </li>
             ))}
           </ul>

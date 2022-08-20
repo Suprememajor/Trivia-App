@@ -1,8 +1,7 @@
 from flask import Flask, abort, jsonify, request
 from flask_cors import CORS
+from models import Category
 from models import setup_db, Question
-
-from backend.models import Category
 
 QUESTIONS_PER_PAGE = 10
 
@@ -136,8 +135,9 @@ def create_app(test_config=None):
     @app.route("/quizzes", methods=["POST"])
     def get_quiz():
         body = request.get_json()
-        previous_questions = body.get("previous_questions", None)
-        quiz_category = body.get("quiz_category", None)
+        previous_questions = body["previous_questions"]
+        cat_id = int(body["quiz_category"]["id"])
+        quiz_category = cat_id if cat_id > 0 else None
         question = None
         try:
             if previous_questions and quiz_category:
