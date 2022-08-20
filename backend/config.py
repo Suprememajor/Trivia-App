@@ -9,10 +9,10 @@ DEBUG = True
 
 # Connect to the database
 DIALECT = "postgresql"
-USER = "suprememajor"
-PASSWORD = "12345678"
-HOST = "localhost"
-PORT = "5432"
-DATABASE_NAME = "test6"
+USER = ""
+PASSWORD = ""
+HOST = ""
+PORT = ""
+DATABASE_NAME = ""
 SQLALCHEMY_DATABASE_URI = f'{DIALECT}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE_NAME}'
 SQLALCHEMY_TRACK_MODIFICATIONS = False
