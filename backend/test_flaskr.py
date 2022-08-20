@@ -7,7 +7,7 @@ from config import DIALECT, USER, PASSWORD, HOST, PORT
 from flaskr import create_app
 from models import Question, Category
 
-DATABASE_NAME = "test7" #"trivia_test"
+DATABASE_NAME = "trivia_test"
 DATABASE_PATH = f'{DIALECT}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE_NAME}'
 
 class CategoryModelTestCase(unittest.TestCase):
