@@ -3,22 +3,25 @@ import unittest
 
 from flask_sqlalchemy import SQLAlchemy
 
+from config import DIALECT, USER, PASSWORD, HOST, PORT
 from flaskr import create_app
 from models import Question, Category
 
+DATABASE_NAME = "test7" #"trivia_test"
+DATABASE_PATH = f'{DIALECT}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE_NAME}'
 
 class CategoryModelTestCase(unittest.TestCase):
     """This class represents the Category model test case"""
 
     def setUp(self):
         """Define test variables and initialize app."""
-        database_path = "postgresql://suprememajor:12345678@localhost:5432/trivia_4"
+
         self.app = create_app()
         self.client = self.app.test_client
-        self.app.config["SQLALCHEMY_DATABASE_URI"] = database_path
+        self.app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_PATH
         self.app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-        self.new_category = {"name": "new category4"}
-        self.new_category2 = {"name": "miSc"}
+        self.new_category = {"name": "Tricky"}
+        self.new_category2 = {"name": "history"}
         self.new_category3 = {"body": "miSc"}
 
         # binds the app to the current context
@@ -32,6 +35,10 @@ class CategoryModelTestCase(unittest.TestCase):
     def tearDown(self):
         """Executed after reach test"""
         pass
+
+    ###################################################################################################################
+    # Tests for create_category
+    ###################################################################################################################
 
     def test_create_new_category(self):
         res = self.client().post("/categories", json=self.new_category)
@@ -57,6 +64,10 @@ class CategoryModelTestCase(unittest.TestCase):
         self.assertEqual(data["success"], False)
         self.assertEqual(data["message"], "resource exists")
 
+    ###################################################################################################################
+    # Tests for retrieve_categories
+    ###################################################################################################################
+
     def test_get_categories(self):
         res = self.client().get("/categories")
         data = json.loads(res.data)
@@ -65,8 +76,12 @@ class CategoryModelTestCase(unittest.TestCase):
         self.assertEqual(data["success"], True)
         self.assertTrue(len(data["categories"]))
 
+    ###################################################################################################################
+    # Tests for retrieve_category_questions
+    ###################################################################################################################
+
     def test_get_cat_questions(self):
-        category_id = 6
+        category_id = 2
         category = Category.query.get(category_id)
         res = self.client().get(f"/categories/{category_id}/questions")
         data = json.loads(res.data)
@@ -87,7 +102,7 @@ class CategoryModelTestCase(unittest.TestCase):
         self.assertEqual(data["message"], "resource not found")
 
     def test_404_empty_category(self):
-        category_id = 8
+        category_id = 7
         res = self.client().get(f"/categories/{category_id}/questions")
         data = json.loads(res.data)
 
@@ -101,23 +116,22 @@ class QuestionModelTestCase(unittest.TestCase):
 
     def setUp(self):
         """Define test variables and initialize app."""
-        database_path = "postgresql://suprememajor:12345678@localhost:5432/trivia_4"
         self.app = create_app()
         self.client = self.app.test_client
-        self.app.config["SQLALCHEMY_DATABASE_URI"] = database_path
+        self.app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_PATH
         self.app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-        self.new_question = {"question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?",
-                             "answer": "Maya Angelou", "category": 5, "difficulty": 3}
+        self.new_question = {"question": "What is the name of the artist who painted ‘Mona Lisa’?",
+                             "answer": "Leonardo Da Vinci", "category": 2, "difficulty": 2}
         self.new_question2 = {"question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?",
                               "answer": "Maya Angelou", "difficulty": 3}
         self.new_question3 = {"question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?",
-                              "answer": "Maya Angelou", "difficulty": 3, "searchTerm": "ose"}
+                              "answer": "Maya Angelou", "difficulty": 3, "searchTerm": "xpres"}
         self.new_question4 = {"question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?",
                               "answer": "Maya Angelou", "difficulty": 3, "searchTerm": "Nirtumizac"}
-        self.quiz1 = {"previous_questions": [12, 13, 14], "quiz_category": 4}
-        self.quiz2 = {"quiz_category": 4}
-        self.quiz3 = {"previous_questions": [12, 13, 14]}
-        self.quiz4 = {"quiz_category": 9}
+        self.quiz1 = {"previous_questions": [5, 9, 23], "quiz_category": {"id": 4, "name": "History"}}
+        self.quiz2 = {"quiz_category": {"id": 5, "name": "Entertainment"}}
+        self.quiz3 = {"previous_questions": [12, 13, 14], "quiz_category": {"id": 5, "name": "Entertainment"}}
+        self.quiz4 = {"quiz_category": {"id": 90, "name": "Unknown"}}
 
         # binds the app to the current context
         with self.app.app_context():
@@ -180,8 +194,8 @@ class QuestionModelTestCase(unittest.TestCase):
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data["success"], True)
-        self.assertEqual(data["question"]["category_id"], self.quiz1["quiz_category"])
-        self.assertEqual(data["question"]["id"], 15)
+        self.assertEqual(data["question"]["category_id"], self.quiz1["quiz_category"]["id"])
+        self.assertEqual(data["question"]["id"], 12)
         self.assertTrue(data["question"])
 
     def test_get_quiz_category(self):
@@ -190,19 +204,11 @@ class QuestionModelTestCase(unittest.TestCase):
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data["success"], True)
-        self.assertEqual(data["question"]["category_id"], self.quiz2["quiz_category"])
+        self.assertEqual(data["question"]["category_id"], self.quiz2["quiz_category"]["id"])
         self.assertTrue(data["question"])
 
     def test_get_quiz_except_list(self):
         res = self.client().post("/quizzes", json=self.quiz3)
-        data = json.loads(res.data)
-
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data["success"], True)
-        self.assertTrue(data["question"])
-
-    def test_get_quiz_no_data(self):
-        res = self.client().post("/quizzes", json={})
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
@@ -216,6 +222,10 @@ class QuestionModelTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data["success"], False)
         self.assertEqual(data["message"], "resource not found")
+
+    ###################################################################################################################
+    # Tests for retrieve_questions
+    ###################################################################################################################
 
     def test_get_paginated_questions(self):
         page = 1
@@ -250,9 +260,12 @@ class QuestionModelTestCase(unittest.TestCase):
         self.assertEqual(data["success"], False)
         self.assertEqual(data["message"], "resource not found")
 
+    ###################################################################################################################
+    # Tests for delete_question
+    ###################################################################################################################
     # Delete a different question in each attempt
     def test_delete_question(self):
-        id = 6
+        id = 21
         res = self.client().delete(f"/questions/{id}")
         data = json.loads(res.data)
         question = Question.query.filter(Question.id == id).one_or_none()
