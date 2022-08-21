@@ -128,16 +128,21 @@ def create_app(test_config=None):
         cat_id = int(body["quiz_category"]["id"])
         quiz_category = cat_id if cat_id > 0 else None
         question = None
+        question_count = 0
         try:
             if previous_questions and quiz_category:
                 question = Question.query.filter(Question.category_id == quiz_category) \
                     .filter(Question.id.not_in(previous_questions)).first()
+                question_count = Question.query.filter(Question.category_id == quiz_category).count()
             elif quiz_category:
                 question = Question.query.filter(Question.category_id == quiz_category).first()
+                question_count = Question.query.filter(Question.category_id == quiz_category).count()
             elif previous_questions:
                 question = Question.query.filter(Question.id.not_in(previous_questions)).first()
+                question_count = Question.query.count()
             else:
                 question = Question.query.first()
+                question_count = Question.query.count()
         except Exception as e:
             abort(422)
 
@@ -145,7 +150,8 @@ def create_app(test_config=None):
             abort(404)
         return jsonify({
             "success": True,
-            "question": question.format()
+            "question": question.format(),
+            "question_count": question_count
         })
 
     @app.route("/questions")

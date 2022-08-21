@@ -202,12 +202,13 @@ The API will return five error types when requests fail:
 ```
 {
   "question": {
-    "answer": "Uruguay",
+    "answer": "Brazil",
     "category_id": 6,
-    "difficulty": 4,
-    "id": 17,
-    "question": "Which country won the first ever soccer World Cup in 1930?"
+    "difficulty": 3,
+    "id": 10,
+    "question": "Which is the only team to play in every soccer World Cup tournament?"
   },
+  "question_count": 2,
   "success": true
 }
 ```
