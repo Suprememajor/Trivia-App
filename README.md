@@ -208,7 +208,6 @@ The API will return five error types when requests fail:
     "id": 10,
     "question": "Which is the only team to play in every soccer World Cup tournament?"
   },
-  "question_count": 2,
   "success": true
 }
 ```
