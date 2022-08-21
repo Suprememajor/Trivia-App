@@ -146,13 +146,19 @@ def create_app(test_config=None):
         except Exception as e:
             abort(422)
 
-        if question is None:
-            abort(404)
+        if question:
+            return jsonify({
+                "success": True,
+                "question": question.format(),
+                "question_count": question_count
+            })
         return jsonify({
             "success": True,
-            "question": question.format(),
             "question_count": question_count
         })
+        
+
+        
 
     @app.route("/questions")
     def retrieve_questions():

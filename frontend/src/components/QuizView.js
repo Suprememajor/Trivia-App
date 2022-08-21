@@ -16,6 +16,7 @@ class QuizView extends Component {
       currentQuestion: {},
       guess: '',
       forceEnd: false,
+      numberOfQuestions: 0,
     };
   }
 
@@ -66,6 +67,7 @@ class QuizView extends Component {
           showAnswer: false,
           previousQuestions: previousQuestions,
           currentQuestion: result.question,
+          numberOfQuestions: result.question_count,
           guess: '',
           forceEnd: result.question ? false : true,
         });
@@ -127,16 +129,28 @@ class QuizView extends Component {
   }
 
   renderFinalScore() {
-    return (
-      <div className='quiz-play-holder'>
-        <div className='final-header'>
-          Your Final Score is {this.state.numCorrect}
+    if(this.state.numberOfQuestions === 0)
+      return (
+        <div className='quiz-play-holder'>
+          <div className='final-header'>
+            Sorry, there are currently no questions in this category, please choose another.
+          </div>
+          <div className='play-again button' onClick={this.restartGame}>
+            Choose category.
+          </div>
         </div>
-        <div className='play-again button' onClick={this.restartGame}>
-          Play Again?
+      );
+    else
+      return (
+        <div className='quiz-play-holder'>
+          <div className='final-header'>
+            Your Final Score is {this.state.numCorrect}/{this.state.numberOfQuestions}
+          </div>
+          <div className='play-again button' onClick={this.restartGame}>
+            Play Again?
+          </div>
         </div>
-      </div>
-    );
+      );    
   }
 
   evaluateAnswer = () => {

@@ -201,6 +201,7 @@ class QuestionModelTestCase(unittest.TestCase):
         self.assertEqual(data["question"]["category_id"], self.quiz1["quiz_category"]["id"])
         self.assertEqual(data["question"]["id"], 12)
         self.assertTrue(data["question"])
+        self.assertTrue(data["question_count"])
 
     def test_get_quiz_category(self):
         res = self.client().post("/quizzes", json=self.quiz2)
@@ -210,6 +211,7 @@ class QuestionModelTestCase(unittest.TestCase):
         self.assertEqual(data["success"], True)
         self.assertEqual(data["question"]["category_id"], self.quiz2["quiz_category"]["id"])
         self.assertTrue(data["question"])
+        self.assertTrue(data["question_count"])
 
     def test_get_quiz_except_list(self):
         res = self.client().post("/quizzes", json=self.quiz3)
@@ -218,14 +220,15 @@ class QuestionModelTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data["success"], True)
         self.assertTrue(data["question"])
+        self.assertTrue(data["question_count"])
 
-    def test_422_get_quiz_failed(self):
+    def test_no_quiz(self):
         res = self.client().post("/quizzes", json=self.quiz4)
         data = json.loads(res.data)
 
-        self.assertEqual(res.status_code, 404)
-        self.assertEqual(data["success"], False)
-        self.assertEqual(data["message"], "resource not found")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data["success"], True)
+        self.assertEqual(data["question_count"], 0)
 
     ###################################################################################################################
     # Tests for retrieve_questions
