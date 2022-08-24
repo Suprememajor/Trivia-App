@@ -7,7 +7,6 @@ def paginate_questions(request, selection):
     page = request.args.get("page", 1, type=int)
     start = (page - 1) * QUESTIONS_PER_PAGE
     end = start + QUESTIONS_PER_PAGE
-
     questions = [questions.format() for questions in selection]
     current_questions = questions[start:end]
 
