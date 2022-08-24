@@ -1,4 +1,4 @@
-## Udacity's Limit Breaking Trivia APp
+ ## Udacity's Limit Breaking Trivia APp
 
 Udacity is invested in creating bonding experiences for its employees and students. A bunch of team members got the idea to hold trivia on a regular basis and created the trivia app to play the game.
 This project is a trivia app for Udacity employees and students. Players are able to pick a category, answer questions, add new questions as well as delete questions. 
@@ -61,8 +61,8 @@ Errors are returned as JSON objects in the following format:
 ```
 {
     "success": False, 
-    "error": 400,
-    "message": "bad request"
+    "error": 404,
+    "message": "Resource Exists"
 }
 ```
 The API will return five error types when requests fail:
