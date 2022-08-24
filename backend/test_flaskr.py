@@ -6,9 +6,9 @@ from flask_sqlalchemy import SQLAlchemy
 from flaskr import create_app
 from models import Question, Category
 
-DIALECT = "postgresql"
-USER = "suprememajor"
-PASSWORD = "12345678"
+DIALECT = ""
+USER = ""
+PASSWORD = ""
 HOST = "localhost"
 PORT = "5432"
 DATABASE_NAME = "trivia_test"
@@ -33,7 +33,6 @@ class CategoryModelTestCase(unittest.TestCase):
             self.db = SQLAlchemy()
             self.db.app = self.app
             self.db.init_app(self.app)
-            # create all tables
             self.db.create_all()
 
     def tearDown(self):
